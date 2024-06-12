@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,11 +8,18 @@ class DeleteContactForm extends JFrame {
     private JButton btnDelete;
     private JButton btnSearch;
     private JButton btnHomepage;
+    private DefaultTableModel dtm;
     private int x = -1; 
 
     private JTextField searchby;
 
-    
+    private String gotId;
+    private String gotName;
+    private String gotPnum;
+    private String gotCName;
+    private String gotSal;
+    private String gotBday;
+
     private JLabel lblId;
     private JLabel lblName;
     private JLabel lblPnum;
@@ -46,26 +54,38 @@ class DeleteContactForm extends JFrame {
         JPanel idTextPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         idTextPanel.add(txtId);
         textPanel.add(idTextPanel);
-        
+
         btnSearch = new JButton("Search");
-        btnSearch.setFont(new Font("", Font.BOLD, 20)); 
+        btnSearch.setFont(new Font("", Font.BOLD, 20));
         JPanel searchBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchBtnPanel.add(btnSearch);
         btnSearch.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                boolean found =false;
-                for(Contact contact:ContactMainForm.contactList){
-                    if(searchby.getText().equals(contact.getName()) || searchby.getText().equals(contact.getPnum())){
-                        txtName.setText("Name: " + contact.getName());
-                        txtNo.setText("Phone Number: " + contact.getPnum());
-                        txtCName.setText("Company Name: " + contact.getConum());
-                        txtSalary.setText("Salary: " + contact.getSalary());
-                        txtBirth.setText("Birthday: " + contact.getBirthday());
+                boolean found = false;
+                for (int i = 0; i < ContactMainForm.contactList.size(); i++) {
+                    Contact contact = ContactMainForm.contactList.get(i);
+                    if (searchby.getText().equals(contact.getName()) || searchby.getText().equals(contact.getPnum())) {
+                        x=i;
+                        gotId = contact.getId();
+                        gotName = contact.getName();
+                        gotPnum = contact.getPnum();
+                        gotCName = contact.getConum();
+                        gotSal = String.valueOf(contact.getSalary());
+                        gotBday = contact.getBirthday();
+
+                        txtId.setText(gotId);
+                        txtName.setText(gotName);
+                        txtNo.setText(gotPnum);
+                        txtCName.setText(gotCName);
+                        txtSalary.setText(gotSal);
+                        txtBirth.setText(gotBday);
+
                         found = true;
                         break;
-                    }else {
-                        JOptionPane.showMessageDialog(null, "Contact not found");
                     }
+                }
+                if (!found) {
+                    JOptionPane.showMessageDialog(DeleteContactForm.this, "Contact not found.");
                 }
             }
         });
@@ -85,10 +105,11 @@ class DeleteContactForm extends JFrame {
             public void actionPerformed(ActionEvent evt) {
                 if (x != -1) { // Ensure a contact is selected
                     ContactMainForm.contactList.remove(x);
-                    //dtm.setRowCount(0);
+                    dtm.removeRow(x);
                     JOptionPane.showMessageDialog(null, "Contact deleted.");
-                    //clearFields();
-                    x = -1; // Reset the selected index
+                    x = -1;
+                    dispose();
+                    new DeleteContactForm().setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "No contact selected for deletion.");
                 }
